@@ -15,8 +15,34 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Stock.cpp">
+    <ClCompile Include="stockholder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="stock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stockclear.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stockexchange.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stockclear.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stockexchange.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stockholder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -147,11 +147,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Stock.cpp" />
+    <ClCompile Include="stock.cpp" />
+    <ClCompile Include="stockclear.cpp" />
+    <ClCompile Include="stockexchange.cpp" />
     <ClCompile Include="stockholder.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="entrust.h" />
     <ClInclude Include="stock.h" />
     <ClInclude Include="stockclear.h" />
     <ClInclude Include="stockexchange.h" />

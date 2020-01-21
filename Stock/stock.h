@@ -15,5 +15,4 @@ public:
     uint64_t m_uAmount;
     uint64_t m_uLastPrice;
     Stock();
-    void Print();
 };

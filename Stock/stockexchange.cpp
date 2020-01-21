@@ -38,22 +38,22 @@ StockExchange& StockExchange::GetInstance()
     return m_instance;
 }
 
-void StockExchange::OnEntrust(const Entrust& entrust)
+void StockExchange::OnEntrust(uint64_t uStockHolderId, uint64_t uAmount, uint64_t uPrice, Direction eDirection, uint64_t uTimeStamp)
 {
-	switch (entrust.m_eDirection)
+	switch (eDirection)
 	{
 	case Direction::BUY:
-		m_buyEntrusts.push_back(entrust);
+		m_buyEntrusts.push_back(Entrust{ uPrice, uAmount, 0, uTimeStamp, uStockHolderId, eDirection });
 		break;
 	case Direction::SALE:
-		m_saleEntrusts.push_back(entrust);
+		m_saleEntrusts.push_back(Entrust{ uPrice, uAmount, 0, uTimeStamp, uStockHolderId, eDirection });
 		break;
 	default:
 		break;
 	}
 }
 
-void StockExchange::OnTime()
+void StockExchange::OnTime(uint64_t uTime)
 {
 	std::list<Deal> deals;
 	uint64_t uDealPrice = 0;
@@ -71,34 +71,47 @@ void StockExchange::OnTime()
 			&& buyEntrustIter->m_uPrice >= saleEntrustIter->m_uPrice)
 		{
 			uint64_t uDealAmount = 0;
-			if (buyEntrustIter->m_uAmount > saleEntrustIter->m_uAmount)
+			if (buyEntrustIter->m_uAmount - buyEntrustIter->m_uDealAmount > saleEntrustIter->m_uAmount - saleEntrustIter->m_uDealAmount)
 			{
-				uDealAmount = saleEntrustIter->m_uAmount;
+				uDealAmount = saleEntrustIter->m_uAmount - saleEntrustIter->m_uDealAmount;
 				uDealPrice = buyEntrustIter->m_uPrice;
-				buyEntrustIter->m_uAmount -= uDealAmount;
-				deals.push_back(Deal{ 0, uDealAmount, saleEntrustIter->m_uStockHolderId, saleEntrustIter->m_eDirection });
-				deals.push_back(Deal{ 0, uDealAmount, buyEntrustIter->m_uStockHolderId, buyEntrustIter->m_eDirection });
+				buyEntrustIter->m_uDealAmount += uDealAmount;
+				saleEntrustIter->m_uDealAmount += uDealAmount;
+				deals.push_back(Deal{ 0, saleEntrustIter->m_uDealAmount, saleEntrustIter->m_uStockHolderId, saleEntrustIter->m_eDirection });
 				++saleEntrustIter;
 			}
-			else if (buyEntrustIter->m_uAmount < saleEntrustIter->m_uAmount)
+			else if (buyEntrustIter->m_uAmount - buyEntrustIter->m_uDealAmount < saleEntrustIter->m_uAmount - saleEntrustIter->m_uDealAmount)
 			{
-				uDealAmount = buyEntrustIter->m_uAmount;
+				uDealAmount = buyEntrustIter->m_uAmount - buyEntrustIter->m_uDealAmount;
 				uDealPrice = saleEntrustIter->m_uPrice;
-				saleEntrustIter->m_uAmount -= uDealAmount;
-				deals.push_back(Deal{ 0, uDealAmount, buyEntrustIter->m_uStockHolderId, buyEntrustIter->m_eDirection });
-				deals.push_back(Deal{ 0, uDealAmount, saleEntrustIter->m_uStockHolderId, saleEntrustIter->m_eDirection });
+				buyEntrustIter->m_uDealAmount += uDealAmount;
+				saleEntrustIter->m_uDealAmount += uDealAmount;
+				deals.push_back(Deal{ 0, buyEntrustIter->m_uDealAmount, buyEntrustIter->m_uStockHolderId, buyEntrustIter->m_eDirection });
 				++buyEntrustIter;
 			}
 			else
 			{
-				uDealAmount = buyEntrustIter->m_uAmount;
+				uDealAmount = buyEntrustIter->m_uAmount - buyEntrustIter->m_uDealAmount;
 				uDealPrice = buyEntrustIter->m_uPrice;
-				deals.push_back(Deal{ 0, uDealAmount, buyEntrustIter->m_uStockHolderId, buyEntrustIter->m_eDirection });
-				deals.push_back(Deal{ 0, uDealAmount, saleEntrustIter->m_uStockHolderId, saleEntrustIter->m_eDirection });
+				buyEntrustIter->m_uDealAmount += uDealAmount;
+				saleEntrustIter->m_uDealAmount += uDealAmount;
+				deals.push_back(Deal{ 0, buyEntrustIter->m_uDealAmount, buyEntrustIter->m_uStockHolderId, buyEntrustIter->m_eDirection });
+				deals.push_back(Deal{ 0, saleEntrustIter->m_uDealAmount, saleEntrustIter->m_uStockHolderId, saleEntrustIter->m_eDirection });
 				++saleEntrustIter;
 				++buyEntrustIter;
 			}
 			uTotalDealAmount += uDealAmount;
+		}
+
+		if (buyEntrustIter != m_buyEntrusts.rend()
+			&& buyEntrustIter->m_uDealAmount > 0)
+		{
+			deals.push_back(Deal{ 0, buyEntrustIter->m_uDealAmount, buyEntrustIter->m_uStockHolderId, buyEntrustIter->m_eDirection });
+		}
+		if (saleEntrustIter != m_saleEntrusts.end()
+			&& saleEntrustIter->m_uDealAmount > 0)
+		{
+			deals.push_back(Deal{ 0, saleEntrustIter->m_uDealAmount, saleEntrustIter->m_uStockHolderId, saleEntrustIter->m_eDirection });
 		}
 	}
 
@@ -108,7 +121,7 @@ void StockExchange::OnTime()
 		{
 			deal.m_uPrice = uDealPrice;
 
-			StockClear::GetInstance().OnDeal(deal);
+			StockClear::GetInstance().OnDeal(deal.m_uStockHolderId, deal.m_uAmount, deal.m_uPrice, deal.m_eDirection, uTime);
 		}
 		m_stock.m_stockQuotations.push_back(Stock::StockQuotation{ uDealPrice, uTotalDealAmount });
 		m_stock.m_uLastPrice = uDealPrice;

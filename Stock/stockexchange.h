@@ -17,6 +17,7 @@ class Entrust
 public:
     uint64_t m_uPrice;
     uint64_t m_uAmount;
+    uint64_t m_uDealAmount;
     uint64_t m_uTimeStamp;
     uint64_t m_uStockHolderId;
     Direction m_eDirection;
@@ -46,6 +47,6 @@ private:
     ~StockExchange();
 public:
     static StockExchange& GetInstance();
-    void OnEntrust(const Entrust& buyEntrust);
-    void OnTime();
+    void OnEntrust(uint64_t uStockHolderId, uint64_t uAmount, uint64_t uPrice, Direction eDirection, uint64_t uTimeStamp);
+    void OnTime(uint64_t uTime);
 };

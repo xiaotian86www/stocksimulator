@@ -3,7 +3,7 @@
 
 StockClear StockClear::m_instance;
 
-const static uint64_t uFee = 1;
+const static uint64_t uFee = 0;
 
 StockClear::StockClear()
 {
@@ -20,31 +20,37 @@ StockClear& StockClear::GetInstance()
     return StockClear::m_instance;
 }
 
-void StockClear::OnDeal(const Deal& deal)
+void StockClear::OnDeal(uint64_t uStockHolderId, uint64_t uAmount, uint64_t uPrice, Direction eDirection, uint64_t uTime)
 {
-    if (deal.m_eDirection == Direction::BUY)
+    Position lastPosition = m_uPositions[uStockHolderId].back();
+    lastPosition.m_uTime = uTime;
+    if (eDirection == Direction::BUY)
     {
-        m_uPositions[deal.m_uStockHolderId].m_uAmount += deal.m_uAmount;
-        m_uPositions[deal.m_uStockHolderId].m_uBalance -= deal.m_uAmount * deal.m_uPrice + uFee;
+        lastPosition.m_uAmount += uAmount;
+        lastPosition.m_uBalance -= uAmount * uPrice + uFee;
     }
     else
     {
-        m_uPositions[deal.m_uStockHolderId].m_uAmount -= deal.m_uAmount;
-        m_uPositions[deal.m_uStockHolderId].m_uBalance += deal.m_uAmount * deal.m_uPrice - uFee;
+        lastPosition.m_uAmount -= uAmount;
+        lastPosition.m_uBalance += uAmount * uPrice;
     }
+    m_uPositions[uStockHolderId].push_back(lastPosition);
 }
 
-const Position& StockClear::GetPosition(uint64_t uStockHolderId) const
+const std::list<Position>& StockClear::GetPosition(uint64_t uStockHolderId) const
 {
     return m_uPositions.at(uStockHolderId);
 }
 
-void StockClear::AddPosition(const Position& position)
+void StockClear::AddPosition(uint64_t uStockHolderId, uint64_t uAmount, uint64_t uBalance)
 {
-    m_uPositions[position.m_uId] = position;
+    m_uPositions[uStockHolderId].push_back(Position{ 0, uAmount, uBalance });
 }
 
 uint64_t StockClear::CalcAmount(uint64_t uBalance, uint64_t uPrice)
 {
-    return (uBalance - uFee) / uPrice;
+    if (uBalance > uFee)
+        return (uBalance - uFee) / uPrice;
+    else
+        return 0;
 }

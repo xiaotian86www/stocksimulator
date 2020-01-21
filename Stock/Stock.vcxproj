@@ -152,12 +152,14 @@
     <ClCompile Include="stockexchange.cpp" />
     <ClCompile Include="stockholder.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="strategy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stock.h" />
     <ClInclude Include="stockclear.h" />
     <ClInclude Include="stockexchange.h" />
     <ClInclude Include="stockholder.h" />
+    <ClInclude Include="strategy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

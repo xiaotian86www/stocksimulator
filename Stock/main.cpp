@@ -13,19 +13,23 @@ int main()
 
     for (size_t i = 0; i < uStockHolderSize; ++i)
     {
-        //if (i < 50)
-        //{
-        //    stockHolders[i] = new StockHolder(63, 63, new BBStrategy());
-        //}
-        //else if (i < 200)
-        //{
-        //    stockHolders[i] = new StockHolder(127, 127, new BSStrategy());
-        //}
-        //else
-        //{
-        //    stockHolders[i] = new StockHolder(63, 63, new NStrategy());
-        //}
-        stockHolders[i] = new StockHolder(191, 63, new NStrategy());
+        if (i < 250)
+        {
+            stockHolders[i] = new StockHolder(127, 127, new BSStrategy());
+        }
+        else if (i < 500)
+        {
+            stockHolders[i] = new StockHolder(63, 63, new BSStrategy());
+        }
+        else if (i < 750)
+        {
+            stockHolders[i] = new StockHolder(31, 31, new BSStrategy());
+        }
+        else
+        {
+            stockHolders[i] = new StockHolder(31, 31, new NStrategy());
+        }
+        //stockHolders[i] = new StockHolder(127, 127, new BBStrategy());
     }
 
     uint64_t uMaxTime = 3000;
